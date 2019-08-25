@@ -1,0 +1,20 @@
+@keyframes falling {
+    0%   { top: 0; }
+    100% { top: 100%; }
+}
+
+@-webkit-keyframes falling {
+    0%   { top: 0; }
+    100% { top: 100%; }
+  }
+
+  @-moz-keyframes falling {
+    0%   { top: 0; }
+    100% { top: 100%; }
+  }
+
+  .fruit{
+      animation: falling 2s linear 0 1;
+  }
+
+ 
