@@ -7,6 +7,5 @@ import { Component, Input } from '@angular/core';
 })
 export class PassedBarComponent {
 
-  @Input() passedCount: number;
-
+  @Input() missedCount: number;
 }

@@ -1,39 +1,72 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FruitOptions } from '../../interfaces';
-import { interval } from 'rxjs';
+import { Component, OnInit, EventEmitter, OnDestroy } from '@angular/core';
+import { interval, Subscription } from 'rxjs';
+import { Fruit, DestroyReport } from '../../interfaces';
+import { Capture } from '../../animations';
 
 @Component({
   templateUrl: './fruit.component.html',
-  styleUrls: ['./fruit.component.scss']
+  styleUrls: ['./fruit.component.scss'],
+  animations: Capture,
 })
-export class FruitComponent implements OnInit {
 
-  @Input() options: FruitOptions;
-  @Input() level: number;
-  @Output() passed = new EventEmitter<void>();
-  @Output() shoot = new EventEmitter<FruitOptions>();
+export class FruitComponent implements OnInit, OnDestroy {
+  
+  fruit: Fruit;
+  fruitStyles: Object;
 
-  mapOptionStyles: Object;
+  level: number;
+  freezed: boolean = false;
+  destroyed: boolean = false;
+
+  gravityAnimation: Subscription;
+  missed = new EventEmitter<void>();
+  captured = new EventEmitter<DestroyReport>();
 
   constructor(){}
 
+  destroy(){
+
+    if(!this.freezed){
+      this.destroyed = true;
+    }
+  }
+
+  beforeCapturing({toState}){
+    toState && this.gravityAnimation.unsubscribe();
+  }
+
+  afterCapturing({toState}){
+    toState && this.captured.emit({
+      target: this.fruit,
+      coords: {
+        x: this.fruit.indent,
+        y: this.fruitStyles['top.px'] + this.fruit.size / 2,
+      },
+    });
+  }
+
+
   ngOnInit() {
 
-
-    interval(300 / this.options.weight).subscribe(_ => {
-      const currentTop = this.mapOptionStyles['top.px'] += this.level;
+    this.gravityAnimation = interval(500 / this.fruit.weight)
+    .subscribe(_ => {
+      const currentTop = this.fruitStyles['top.px'] += this.level
       if(currentTop > window.innerHeight){
-        this.passed.emit();
+        this.missed.emit();
       }
     })
 
-    this.mapOptionStyles = {
-      'position': 'fixed',
-      'height': 'auto',
-      'width.px': this.options.size,
-      'left.px': this.options.indent,
-      'top.px': -this.options.size,
+    this.fruitStyles = {
+      'width.px': this.fruit.size,
+      'left.px': this.fruit.indent,
+      'top.px': -this.fruit.size,
     }
+  }
+
+  ngOnDestroy(){
+    this.captured.complete();
+    this.missed.complete();
+    this.gravityAnimation.unsubscribe();
   }
 
 }

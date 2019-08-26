@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { interval, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { interval, Subject, Observable } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { FRUITS } from '../constants';
 import { RandomGeneratorService } from './random-generator.service';
+import { Fruit } from '../interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -10,21 +11,33 @@ import { RandomGeneratorService } from './random-generator.service';
 
 export class FruitProviderService {
 
-  constructor(private _randomizer: RandomGeneratorService) {}
+  private destroy: Subject<void>;
+  private fruitPicker: Function;
 
-  provide(){
+  constructor(private _randomizer: RandomGeneratorService) {
+    this.destroy = new Subject();
+    this.fruitPicker = this._randomizer.uniqueRandomFrom<Fruit>(FRUITS);
+  }
 
-    const fruitPicker = this._randomizer.uniqueRandomFrom(FRUITS);
+  private getRandomFruit(): Fruit {
+    const randomFruit = this.fruitPicker();
+    randomFruit.indent = this._randomizer.random(window.innerWidth - randomFruit.size);
+    return randomFruit;
+  }
 
-    return interval(2000)
+  provide(speed: number): Observable<Fruit> {
+    this.destroy.next();
+    return interval(speed)
     .pipe(
-      map(_ => {
-        const randomFruit = fruitPicker();
-        randomFruit.indent = this._randomizer.random(window.innerWidth - randomFruit.size);
-
-        return randomFruit;
-      })
+      takeUntil(this.destroy),
+      map(_ => this.getRandomFruit()),
     )
   }
+
+  stop(): void{
+    this.destroy.next();
+  }
+
+
 
 }

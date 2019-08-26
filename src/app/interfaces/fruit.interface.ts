@@ -1,4 +1,4 @@
-export interface FruitOptions {
+export interface Fruit {
     name: string;
     imgSrc: string;
     weight: number;

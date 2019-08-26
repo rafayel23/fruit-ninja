@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { FRUITS } from '../constants';
 
 @Injectable({
   providedIn: 'root'
@@ -7,21 +6,18 @@ import { FRUITS } from '../constants';
 
 export class RandomGeneratorService {
 
-  constructor() {}
-
-  random(max: number, min: number = 0): number{
+  public random(max: number, min: number = 0): number{
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  randomFrom<T>(array: T[]): T {
+  public randomFrom<T>(array: T[]): T {
     const randomIndex = this.random(array.length - 1);
     return array[randomIndex];
   }
 
-  uniqueRandom(max: number, min: number = 0): () => number {
+  public uniqueRandom(max: number, min: number = 0): () => number {
 
     let prevValue: number;
-
     let recursiveGenerator = () => {
       const random = this.random(max,min);
 
@@ -32,18 +28,15 @@ export class RandomGeneratorService {
         return prevValue = random;    
       }
     }
-
     return recursiveGenerator;
-
   }
 
 
-  uniqueRandomFrom<T>(array: T[]): () => T {
+  public uniqueRandomFrom<T>(array: T[]): () => T {
 
-    let prevValue: any;
-
+    let prevValue: T;
     let recursiveGenerator = () => {
-      const random = this.randomFrom(array);
+      const random = this.randomFrom<T>(array);
 
       if(prevValue === random){
         return recursiveGenerator();
@@ -52,9 +45,7 @@ export class RandomGeneratorService {
         return prevValue = random; 
       }
     }
-
     return recursiveGenerator;
-
   }
 
 

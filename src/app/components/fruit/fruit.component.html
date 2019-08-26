@@ -1,1 +1,9 @@
-<img highlight (click)="shoot.emit(options)" [src]="options.imgSrc" [ngStyle]="mapOptionStyles">
+<img 
+(mouseenter)="destroy()" 
+[src]="fruit.imgSrc"
+[ngStyle]="fruitStyles"
+
+[@capture]="destroyed"
+(@capture.done)="afterCapturing($event)"
+(@capture.start)="beforeCapturing($event)"
+>
